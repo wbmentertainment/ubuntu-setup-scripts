@@ -108,4 +108,4 @@ sudo chmod 644 "$TIMER_SERVICE_FILE"
 # ==== Nạp & chạy Timer service ====
 sudo systemctl daemon-reload
 sudo systemctl enable --now media-editor-backup.timer
-systemctl list-timers | grep media-editor-backup
+#systemctl list-timers | grep media-editor-backup
