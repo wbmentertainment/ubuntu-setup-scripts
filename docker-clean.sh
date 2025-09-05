@@ -2,7 +2,14 @@
 set -euo pipefail
 
 echo "⚠️ CẢNH BÁO: Script này sẽ xóa TOÀN BỘ container, image, volume, network trong Docker."
-echo "👉 Đang tiến hành (mặc định = yes)..."
+
+read -rp "Bạn có chắc chắn muốn tiếp tục? (yes/no) [yes]: " confirm
+confirm=${confirm:-yes}   # nếu để trống thì mặc định = yes
+
+if [[ "$confirm" != "yes" ]]; then
+  echo "❌ Huỷ thao tác."
+  exit 1
+fi
 
 echo "----> Dừng tất cả container"
 docker stop $(docker ps -aq) 2>/dev/null || true
