@@ -1,0 +1,11 @@
+# /etc/systemd/system/media-auth-backup.service
+[Unit]
+Description=Backup Mongo (auth) to NAS
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=wbm
+WorkingDirectory=/home/wbm/projects/media-auth
+ExecStart=/bin/bash /home/wbm/projects/media-auth/backup-mongo.sh

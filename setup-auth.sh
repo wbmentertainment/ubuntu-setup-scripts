@@ -6,6 +6,7 @@ OWNER="${SUDO_USER:-$USER}"
 REPO_DIR="${REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 PROJECT_DIR="/home/${OWNER}/projects/media-auth"
 SERVICE_FILE="/etc/systemd/system/media-auth.service"
+BK_SERVICE_FILE="/etc/systemd/system/media-auth-backup.service"
 SRC_DIR="${REPO_DIR}/auth"
 
 # Image cần dùng (chỉnh theo docker-compose.yml của bạn)
@@ -31,6 +32,61 @@ if ! docker image inspect "$DOCKER_IMAGE" >/dev/null 2>&1; then
 else
   echo "ℹ️  Docker image $DOCKER_IMAGE đã tồn tại, bỏ qua pull."
 fi
+
+# ==== Tạo service ====
+sudo tee "$SERVICE_FILE" > /dev/null <<EOF
+[Unit]
+Description=Chạy media-auth khi khởi động
+After=network-online.target docker.service
+Wants=network-online.target docker.service
+
+[Service]
+Type=oneshot
+User=${OWNER}
+PermissionsStartOnly=true
+ExecStartPre=-/usr/bin/umount -l ${PROJECT_DIR}/NAS
+ExecStartPre=/usr/bin/mkdir -p ${PROJECT_DIR}/NAS
+ExecStartPre=/usr/bin/mount -t cifs -o username=admin1,password=Came2020,vers=3.0,rw,dir_mode=0777,file_mode=0777 //192.168.1.111/media-auth ${PROJECT_DIR}/NAS
+ExecStart=/bin/bash ${PROJECT_DIR}/startup.sh
+StandardOutput=append:/var/log/media-auth.log
+StandardError=append:/var/log/media-auth.log
+RemainAfterExit=true
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+WorkingDirectory=${PROJECT_DIR}
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo chmod 644 "$SERVICE_FILE"
+
+# ==== Nạp & chạy service ====
+sudo systemctl daemon-reload
+sudo systemctl enable --now media-auth.service
+sudo systemctl restart media-auth.service
+sudo systemctl status media-auth.service --no-pager
+
+# ==== Tạo Backup service ====
+sudo tee "$BK_SERVICE_FILE" > /dev/null <<EOF
+[Unit]
+Description=Backup Mongo (auth) to NAS
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=wbm
+WorkingDirectory=/home/wbm/projects/media-auth
+ExecStart=/bin/bash /home/wbm/projects/media-auth/backup-mongo.sh
+EOF
+
+sudo chmod 644 "$BK_SERVICE_FILE"
+
+# ==== Nạp & chạy service ====
+sudo systemctl daemon-reload
+sudo systemctl enable --now media-auth.service
+sudo systemctl restart media-auth.service
+sudo systemctl status media-auth.service --no-pager
 
 # ==== Tạo service ====
 sudo tee "$SERVICE_FILE" > /dev/null <<EOF
