@@ -7,7 +7,7 @@ PROJECT_DIR="/home/${OWNER}/projects/media-auth"
 SERVICE_FILE="/etc/systemd/system/media-auth.service"
 
 # Link RAW đến repo (đặt đúng username/repo/branch)
-BASE_RAW="https://raw.githubusercontent.com/wbmentertainment/ubuntu-setup-scripts/main/auth"
+BASE_RAW="https://cdn.jsdelivr.net/gh/wbmentertainment/ubuntu-setup-scripts@main/auth"
 URL_STARTUP="${BASE_RAW}/startup.sh"
 URL_COMPOSE="${BASE_RAW}/docker-compose.yml"
 

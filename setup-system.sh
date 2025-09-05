@@ -5,7 +5,7 @@ set -euo pipefail
 GITHUB_USER="wbmentertainment"
 REPO="ubuntu-setup-scripts"
 BRANCH="main"
-BASE_URL="https://raw.githubusercontent.com/${GITHUB_USER}/${REPO}/${BRANCH}"
+BASE_URL="https://cdn.jsdelivr.net/gh/${GITHUB_USER}/${REPO}@${BRANCH}"
 OWNER="${SUDO_USER:-$USER}"
 BASE_DIR="/home/${OWNER}/projects"
 

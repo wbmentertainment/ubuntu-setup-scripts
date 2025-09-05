@@ -7,7 +7,7 @@ PROJECT_DIR="/home/${OWNER}/projects/media-editor"
 SERVICE_FILE="/etc/systemd/system/media-editor.service"
 
 # Link RAW đến repo (đặt đúng username/repo/branch)
-BASE_RAW="https://raw.githubusercontent.com/wbmentertainment/ubuntu-setup-scripts/main/editor"
+BASE_RAW="https://cdn.jsdelivr.net/gh/wbmentertainment/ubuntu-setup-scripts@main/editor"
 URL_STARTUP="${BASE_RAW}/startup.sh"
 URL_COMPOSE="${BASE_RAW}/docker-compose.yml"
 
