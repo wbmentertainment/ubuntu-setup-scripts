@@ -17,6 +17,7 @@ DOCKER_IMAGE="ghcr.io/wbmentertainment/reup:latest"
 sudo mkdir -p "$PROJECT_DIR"
 sudo chown -R "${OWNER}:${OWNER}" "$PROJECT_DIR"
 
+cp -f "${SRC_DIR}/backup-mongo.sh"        "${PROJECT_DIR}/backup-mongo.sh"
 cp -f "${SRC_DIR}/startup.sh"        "${PROJECT_DIR}/startup.sh"
 cp -f "${SRC_DIR}/docker-compose.yml" "${PROJECT_DIR}/docker-compose.yml"
 
