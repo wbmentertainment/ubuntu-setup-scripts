@@ -82,6 +82,9 @@ EOF
 
 sudo chmod 644 "$BK_SERVICE_FILE"
 
+# ==== Nạp Backup service ====
+sudo systemctl daemon-reload
+
 # ==== Tạo Timer service ====
 sudo tee "$TIMER_SERVICE_FILE" > /dev/null <<EOF
 [Unit]
