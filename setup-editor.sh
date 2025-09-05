@@ -63,9 +63,9 @@ sudo chmod 644 "$SERVICE_FILE"
 
 # ==== Nạp & chạy service ====
 sudo systemctl daemon-reload
-sudo systemctl enable --now media-editor.service
-sudo systemctl restart media-editor.service
-sudo systemctl status media-editor.service --no-pager
+sudo systemctl enable --now media-editor.service || true
+sudo systemctl restart media-editor.service || true
+sudo systemctl status media-editor.service --no-pager || true
 
 # ==== Tạo Backup service ====
 sudo tee "$BK_SERVICE_FILE" > /dev/null <<EOF
@@ -85,7 +85,7 @@ sudo chmod 644 "$BK_SERVICE_FILE"
 
 # ==== Nạp & chạy Backup service ====
 sudo systemctl daemon-reload
-sudo systemctl enable --now media-editor-backup.service
+sudo systemctl enable --now media-editor-backup.service || true
 #sudo systemctl restart media-editor-backup.service
 #sudo systemctl status media-editor-backup.service --no-pager
 
@@ -107,7 +107,6 @@ sudo chmod 644 "$TIMER_SERVICE_FILE"
 
 # ==== Nạp & chạy Timer service ====
 sudo systemctl daemon-reload
-sudo systemctl enable --now media-editor-backup.timer
-sudo systemctl restart media-editor-backup.timer
-sudo systemctl status media-editor-backup.service --no-pager
-systemctl list-timers | grep media-editor-backup
+sudo systemctl enable --now media-editor-backup.timer || true
+sudo systemctl restart media-editor-backup.timer || true
+systemctl list-timers | grep media-editor-backup || true
