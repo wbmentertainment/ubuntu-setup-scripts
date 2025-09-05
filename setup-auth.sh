@@ -1,49 +1,53 @@
-#!/bin/bash
-# Script setup systemd service media-auth
+#!/usr/bin/env bash
+set -euo pipefail
 
-PROJECT_DIR="/home/wbm/projects/media-auth"
+# ==== Config ====
+OWNER="${SUDO_USER:-$USER}"
+PROJECT_DIR="/home/${OWNER}/projects/media-auth"
 SERVICE_FILE="/etc/systemd/system/media-auth.service"
-STARTUP_SCRIPT="$PROJECT_DIR/startup.sh"
 
-# Tạo thư mục project nếu chưa có
+# Link RAW đến repo (đặt đúng username/repo/branch)
+BASE_RAW="https://raw.githubusercontent.com/wbmentertainment/ubuntu-setup-scripts/main/auth"
+URL_STARTUP="${BASE_RAW}/startup.sh"
+URL_COMPOSE="${BASE_RAW}/docker-compose.yml"
+
+# ==== Chuẩn bị thư mục ====
 sudo mkdir -p "$PROJECT_DIR"
-sudo chown -R wbm:wbm "$PROJECT_DIR"
+sudo chown -R "${OWNER}:${OWNER}" "$PROJECT_DIR"
 
-# Tải file startup.sh (bạn thay link tải vào nếu cần)
-# Ví dụ giả định: https://example.com/startup.sh
-# sudo curl -o "$STARTUP_SCRIPT" https://example.com/startup.sh
+# ==== Tải file cần thiết ====
+echo "-> Download startup.sh: ${URL_STARTUP}"
+curl -fsSL "${URL_STARTUP}" -o "${PROJECT_DIR}/startup.sh"
 
-# Nếu đã có sẵn startup.sh thì chỉ cần chmod
-sudo chmod +x "$STARTUP_SCRIPT"
+echo "-> Download docker-compose.yml: ${URL_COMPOSE}"
+curl -fsSL "${URL_COMPOSE}" -o "${PROJECT_DIR}/docker-compose.yml"
 
-# Tạo systemd service file
+# Quyền thực thi cho startup.sh
+sudo chown "${OWNER}:${OWNER}" "${PROJECT_DIR}/startup.sh" "${PROJECT_DIR}/docker-compose.yml"
+sudo chmod +x "${PROJECT_DIR}/startup.sh"
+
+# ==== Tạo service ====
 sudo tee "$SERVICE_FILE" > /dev/null <<EOF
 [Unit]
-Description=Media Auth Service
-After=network.target
+Description=Chạy media-auth khi khởi động
+After=network-online.target docker.service
+Wants=network-online.target docker.service
 
 [Service]
-Type=simple
-User=wbm
-ExecStart=/bin/bash $STARTUP_SCRIPT
-Restart=always
+Type=oneshot
+User=${OWNER}
+ExecStart=/bin/bash ${PROJECT_DIR}/startup.sh
+RemainAfterExit=true
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+WorkingDirectory=${PROJECT_DIR}
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
-# Set quyền service file
 sudo chmod 644 "$SERVICE_FILE"
 
-# Thêm rule vào sudoers (chỉ cho phép chạy startup.sh không cần mật khẩu)
-if ! sudo grep -q "$STARTUP_SCRIPT" /etc/sudoers; then
-  echo "wbm ALL=(ALL) NOPASSWD: /bin/bash $STARTUP_SCRIPT" | sudo EDITOR='tee -a' visudo >/dev/null
-fi
-
-# Reload systemd và bật service
+# ==== Nạp & chạy service ====
 sudo systemctl daemon-reload
-sudo systemctl enable media-auth.service
-sudo systemctl start media-auth.service
-
-# Hiển thị trạng thái
+sudo systemctl enable --now media-auth.service
 sudo systemctl status media-auth.service --no-pager
