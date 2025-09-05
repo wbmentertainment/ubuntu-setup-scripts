@@ -41,6 +41,10 @@ Wants=network-online.target docker.service
 [Service]
 Type=oneshot
 User=${OWNER}
+PermissionsStartOnly=true
+ExecStartPre=/usr/bin/umount -l /home/wbm/projects/media-reup/NAS
+ExecStartPre=/usr/bin/mkdir -p /home/wbm/projects/media-reup/NAS
+ExecStartPre=/usr/bin/mount -t cifs -o credentials=/home/wbm/.secrets/nas.creds,vers=3.0,rw,uid=1001,gid=1001,dir_mode=0777,file_mode=0666,noperm //192.168.1.111/media-reup /home/wbm/projects/media-reup/NAS
 ExecStart=/bin/bash ${PROJECT_DIR}/startup.sh
 StandardOutput=append:/var/log/media-reup.log
 StandardError=append:/var/log/media-reup.log
