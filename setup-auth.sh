@@ -65,7 +65,6 @@ sudo chmod 644 "$SERVICE_FILE"
 # ==== Nạp & chạy service ====
 sudo systemctl daemon-reload
 sudo systemctl enable --now media-auth.service || true
-sudo systemctl restart media-auth.service || true
 sudo systemctl status media-auth.service --no-pager || true
 
 # ==== Tạo Backup service ====
@@ -83,12 +82,6 @@ ExecStart=/bin/bash /home/wbm/projects/media-auth/backup-mongo.sh
 EOF
 
 sudo chmod 644 "$BK_SERVICE_FILE"
-
-# ==== Nạp & chạy Backup service ====
-sudo systemctl daemon-reload
-sudo systemctl enable --now media-auth-backup.service || true
-#sudo systemctl restart media-auth-backup.service
-#sudo systemctl status media-auth-backup.service --no-pager
 
 # ==== Tạo Timer service ====
 sudo tee "$TIMER_SERVICE_FILE" > /dev/null <<EOF
@@ -109,5 +102,4 @@ sudo chmod 644 "$TIMER_SERVICE_FILE"
 # ==== Nạp & chạy Timer service ====
 sudo systemctl daemon-reload
 sudo systemctl enable --now media-auth-backup.timer || true
-sudo systemctl restart media-auth-backup.timer || true
 systemctl list-timers | grep media-auth-backup || true

@@ -64,7 +64,6 @@ sudo chmod 644 "$SERVICE_FILE"
 # ==== Nạp & chạy service ====
 sudo systemctl daemon-reload
 sudo systemctl enable --now media-reup.service || true
-sudo systemctl restart media-reup.service || true
 sudo systemctl status media-reup.service --no-pager || true
 
 # ==== Tạo Backup service ====
@@ -82,12 +81,6 @@ ExecStart=/bin/bash /home/wbm/projects/media-reup/backup-mongo.sh
 EOF
 
 sudo chmod 644 "$BK_SERVICE_FILE"
-
-# ==== Nạp & chạy Backup service ====
-sudo systemctl daemon-reload
-sudo systemctl enable --now media-reup-backup.service || true
-#sudo systemctl restart media-reup-backup.service
-#sudo systemctl status media-reup-backup.service --no-pager
 
 # ==== Tạo Timer service ====
 sudo tee "$TIMER_SERVICE_FILE" > /dev/null <<EOF
@@ -108,5 +101,4 @@ sudo chmod 644 "$TIMER_SERVICE_FILE"
 # ==== Nạp & chạy Timer service ====
 sudo systemctl daemon-reload
 sudo systemctl enable --now media-reup-backup.timer || true
-sudo systemctl restart media-reup-backup.timer || true
 systemctl list-timers | grep media-reup-backup || true
