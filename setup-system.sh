@@ -26,7 +26,6 @@ ensure_docker_network() {
 run_module() {
   local name="$1"
   local src="${REPO_DIR}/setup-${name}.sh"
-  local dst="${dir}/setup-${name}.sh"
 
   echo "----> Chuẩn bị module: $name"
 
@@ -35,8 +34,8 @@ run_module() {
     exit 1
   fi
 
-  echo "----> Chạy $dst"
-  sudo bash "$dst"
+  echo "----> Chạy $src"
+  sudo bash "$src"
 }
 
 # === Main ===
