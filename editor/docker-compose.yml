@@ -9,7 +9,7 @@ services:
       - MONGODB_ROOT_PASSWORD=dGcnRzGcNc8RXx6u
       - MONGODB_REPLICA_SET_KEY=replicasetkey123
     volumes:
-      - /home/wbm/projects/media-editor/NAS/database:/bitnami
+      - /home/wbm/projects/media-editor/NAS/database:/bitnami/mongodb
     networks:
       - mongodb
 
