@@ -1,5 +1,8 @@
 ## Setup server:
 ```bash
+git clone https://github.com/wbmentertainment/ubuntu-setup-scripts.git
+cd /ubuntu-setup-scripts
+
 wget https://cdn.jsdelivr.net/gh/wbmentertainment/ubuntu-setup-scripts@main/setup-server.sh -O setup-server.sh
 chmod +x setup-server.sh
 ./setup-server.sh

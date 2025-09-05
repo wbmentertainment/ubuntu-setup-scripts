@@ -2,15 +2,11 @@
 set -euo pipefail
 
 # === Config ===
-GH_USER="wbmentertainment"
-REPO="ubuntu-setup-scripts"
-BRANCH="main"
-
 OWNER="${SUDO_USER:-$USER}"
 BASE_DIR="/home/${OWNER}/projects"
-WORK_DIR="/tmp/${REPO}"
-
 MODULES=(auth editor reup nginx)
+
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # === Helpers ===
 ensure_docker_network() {
@@ -27,16 +23,9 @@ ensure_docker_network() {
   fi
 }
 
-fetch_repo() {
-  echo "===> Clone repo ${REPO}..."
-  rm -rf "$WORK_DIR"
-  git clone --depth 1 --branch "$BRANCH" "https://github.com/${GH_USER}/${REPO}.git" "$WORK_DIR"
-  echo "✅ Repo cloned vào $WORK_DIR"
-}
-
 run_module() {
   local name="$1"
-  local src="$WORK_DIR/setup-${name}.sh"
+  local src="${REPO_DIR}/setup-${name}.sh"
   local dir="${BASE_DIR}/media-${name}"
   local dst="${dir}/setup-${name}.sh"
 
@@ -60,10 +49,7 @@ run_module() {
 echo "===> Bước 1: Đảm bảo Docker network"
 ensure_docker_network "nginx-net"
 
-echo "===> Bước 2: Clone repo"
-fetch_repo
-
-echo "===> Bước 3: Setup modules: ${MODULES[*]}"
+echo "===> Bước 2: Setup modules: ${MODULES[*]}"
 for m in "${MODULES[@]}"; do
   run_module "$m"
 done
