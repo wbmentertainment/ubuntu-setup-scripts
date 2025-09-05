@@ -13,6 +13,6 @@ mount -t cifs -o username=admin1,password=Came2020,rw //192.168.1.111/media-auth
 
 chmod -R 777 /home/wbm/projects/media-auth/NAS
 
-echo "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" | docker login ghcr.io -u dev-binhnx --password-stdin
+echo "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" | docker login ghcr.io -u dev-binhnx --password-stdin
 docker compose up -d
 docker image prune -f

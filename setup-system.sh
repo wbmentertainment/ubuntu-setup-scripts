@@ -42,7 +42,10 @@ run_module() {
 echo "===> Bước 1: Đảm bảo Docker network"
 ensure_docker_network "nginx-net"
 
-echo "===> Bước 2: Setup modules: ${MODULES[*]}"
+echo "===> Bước 2: Đăng nhập Docker registry"
+echo "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" | docker login ghcr.io -u dev-binhnx --password-stdin
+
+echo "===> Bước 3: Setup modules: ${MODULES[*]}"
 for m in "${MODULES[@]}"; do
   run_module "$m"
 done
