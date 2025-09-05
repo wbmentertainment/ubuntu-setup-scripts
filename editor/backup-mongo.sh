@@ -5,7 +5,7 @@ set -euo pipefail
 # ==== CONFIG ====
 MONGO_CONTAINER="${MONGO_CONTAINER:-media-editor-db}"   # tên container primary
 MONGO_URI="${MONGO_URI:-mongodb://root:dGcnRzGcNc8RXx6u@media-editor-db:27017/media-editor?replicaSet=replicaset&authSource=admin&retryWrites=true&w=majority}"
-NAS_DIR="${NAS_DIR:-/home/wbm/projects/media-auth/NAS/database}"  # thư mục NAS đã mount sẵn
+NAS_DIR="${NAS_DIR:-/home/wbm/projects/media-editor/NAS/database}"  # thư mục NAS đã mount sẵn
 RETENTION_DAYS="${RETENTION_DAYS:-3}"  # số ngày giữ bản backup
 # ==== END CONFIG ====
 
