@@ -6,6 +6,8 @@ GITHUB_USER="wbmentertainment"
 REPO="ubuntu-setup-scripts"
 BRANCH="main"
 BASE_URL="https://raw.githubusercontent.com/${GITHUB_USER}/${REPO}/${BRANCH}"
+OWNER="${SUDO_USER:-$USER}"
+BASE_DIR="/home/${OWNER}/projects"
 
 MODULES=(auth editor reup nginx)
 
