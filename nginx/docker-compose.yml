@@ -1,0 +1,28 @@
+services:
+  proxy:
+    image: ghcr.io/wbmentertainment/nginx:latest
+    container_name: proxy
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./html:/var/www/html
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    networks:
+      - nginx-net
+  certbot:
+    image: certbot/certbot:latest
+    container_name: certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c"
+    command: >
+      "trap exit TERM; while :; do sleep 6h & wait $${!}; certbot renew; done"
+      
+networks:
+  nginx-net:
+    name: nginx-net
+    external: true

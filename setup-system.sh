@@ -1,49 +1,54 @@
-#!/bin/bash
-# Script setup systemd service media-reup
+#!/usr/bin/env bash
+set -euo pipefail
 
-PROJECT_DIR="/home/wbm/projects/media-reup"
-SERVICE_FILE="/etc/systemd/system/media-reup.service"
-STARTUP_SCRIPT="$PROJECT_DIR/startup.sh"
+# === Config ===
+GITHUB_USER="wbmentertainment"
+REPO="ubuntu-setup-scripts"
+BRANCH="main"
+BASE_URL="https://raw.githubusercontent.com/${GITHUB_USER}/${REPO}/${BRANCH}"
 
-# Tạo thư mục project nếu chưa có
-sudo mkdir -p "$PROJECT_DIR"
-sudo chown -R wbm:wbm "$PROJECT_DIR"
+MODULES=(auth editor reup nginx)
 
-# Tải file startup.sh (bạn thay link tải vào nếu cần)
-# Ví dụ giả định: https://example.com/startup.sh
-# sudo curl -o "$STARTUP_SCRIPT" https://example.com/startup.sh
+# === Helpers ===
+fetch_and_run() {
+  local name="$1"
+  local dir="${BASE_DIR}/media-${name}"
+  local file="${dir}/setup-${name}.sh"
+  local url="${BASE_URL}/setup-${name}.sh"
 
-# Nếu đã có sẵn startup.sh thì chỉ cần chmod
-sudo chmod +x "$STARTUP_SCRIPT"
+  echo "----> Preparing dir ${dir}"
+  sudo mkdir -p "$dir"
+  sudo chown -R wbm:wbm "$dir"
 
-# Tạo systemd service file
-sudo tee "$SERVICE_FILE" > /dev/null <<EOF
-[Unit]
-Description=Media Reup Service
-After=network.target
+  echo "----> Downloading ${name}: ${url} -> ${file}"
+  curl -fsSL "$url" -o "$file"
 
-[Service]
-Type=simple
-User=wbm
-ExecStart=/bin/bash $STARTUP_SCRIPT
-Restart=always
+  echo "----> Executing ${file}"
+  chmod +x "$file"
+  sudo bash "$file"
+}
 
-[Install]
-WantedBy=multi-user.target
-EOF
+ensure_docker_network() {
+  local net="$1"
+  if ! command -v docker >/dev/null 2>&1; then
+    echo "⚠️ Docker chưa cài, bỏ qua tạo network '${net}'."
+    return 0
+  fi
+  if ! docker network ls --format '{{.Name}}' | grep -qw "$net"; then
+    echo "----> Creating docker network: ${net}"
+    sudo docker network create "$net"
+  else
+    echo "ℹ️ Docker network '${net}' đã tồn tại."
+  fi
+}
 
-# Set quyền service file
-sudo chmod 644 "$SERVICE_FILE"
+# === Main ===
+echo "===> Đảm bảo docker network nginx-net tồn tại"
+ensure_docker_network "nginx-net"
 
-# Thêm rule vào sudoers (chỉ cho phép chạy startup.sh không cần mật khẩu)
-if ! sudo grep -q "$STARTUP_SCRIPT" /etc/sudoers; then
-  echo "wbm ALL=(ALL) NOPASSWD: /bin/bash $STARTUP_SCRIPT" | sudo EDITOR='tee -a' visudo >/dev/null
-fi
+echo "===> Running setup for modules: ${MODULES[*]}"
+for m in "${MODULES[@]}"; do
+  fetch_and_run "$m"
+done
 
-# Reload systemd và bật service
-sudo systemctl daemon-reload
-sudo systemctl enable media-reup.service
-sudo systemctl start media-reup.service
-
-# Hiển thị trạng thái
-sudo systemctl status media-reup.service --no-pager
+echo "✅ All modules completed."

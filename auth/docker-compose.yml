@@ -1,0 +1,108 @@
+services:
+  zodi-auth-db:
+    image: 'bitnami/mongodb:latest'
+    container_name: zodi-auth-db
+    #restart: unless-stopped
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=zodi-auth-db
+      - MONGODB_REPLICA_SET_MODE=primary
+      - MONGODB_ROOT_PASSWORD=dGcnRzGcNc8RXx6u
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+    volumes:
+      - /home/wbm/projects/media-auth/NAS/database:/bitnami   
+    networks:
+      - mongodb
+
+  zodi-auth-db-secondary:
+    image: 'bitnami/mongodb:latest'
+    container_name: zodi-auth-db-secondary
+    #restart: unless-stopped
+    depends_on:
+      - zodi-auth-db
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=zodi-auth-db-secondary
+      - MONGODB_REPLICA_SET_MODE=secondary
+      - MONGODB_INITIAL_PRIMARY_HOST=zodi-auth-db
+      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=dGcnRzGcNc8RXx6u
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+    networks:
+      - mongodb
+
+  zodi-auth-db-arbiter:
+    image: 'bitnami/mongodb:latest'
+    container_name: zodi-auth-db-arbiter
+    #restart: unless-stopped
+    depends_on:
+      - zodi-auth-db
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=zodi-auth-db-arbiter
+      - MONGODB_REPLICA_SET_MODE=arbiter
+      - MONGODB_INITIAL_PRIMARY_HOST=zodi-auth-db
+      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=dGcnRzGcNc8RXx6u
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+    networks:
+      - mongodb
+
+  zodi-auth-db-ui:
+    image: mongo-express
+    container_name: zodi-auth-db-ui
+    #restart: unless-stopped
+    environment:
+        - ME_CONFIG_MONGODB_URL=mongodb://root:dGcnRzGcNc8RXx6u@zodi-auth-db:27017/zodi-auth?replicaSet=replicaset&authSource=admin&retryWrites=true&w=majority
+        - ME_CONFIG_BASICAUTH_USERNAME=admin
+        - ME_CONFIG_BASICAUTH_PASSWORD=Admin@123
+    depends_on:
+        - zodi-auth-db
+        - zodi-auth-db-secondary
+        - zodi-auth-db-arbiter
+    ports:
+        - "9000:8081"
+    networks:
+        - mongodb
+
+  zodi-auth-redis:
+    image: redis
+    container_name: zodi-auth-redis
+    #restart: unless-stopped
+    volumes:
+      - redis:/data
+    networks:
+      - redis
+
+  app:
+    container_name: zodi-auth
+    image: ghcr.io/wbmentertainment/auth:latest
+    #restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+      - /home/wbm/projects/media-auth/NAS/avatars:/app/avatars
+    # ports:
+    #   - 8084:80
+    depends_on:
+      - zodi-auth-db
+      - zodi-auth-db-secondary
+      - zodi-auth-db-arbiter
+      - zodi-auth-redis
+    networks:
+      - nginx-net
+      - mongodb
+      - redis
+    
+volumes:
+  mongodb:
+    name: zodi-auth-db
+    driver: local
+  redis:
+    name: zodi-auth-redis
+    driver: local
+
+networks:
+  nginx-net:
+    name: nginx-net
+    external: true
+  mongodb:
+    name: zodi-auth-db
+  redis:
+    name: zodi-auth-redis

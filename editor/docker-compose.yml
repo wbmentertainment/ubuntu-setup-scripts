@@ -1,0 +1,113 @@
+services:
+  media-editor-db:
+    image: 'bitnami/mongodb:latest'
+    container_name: media-editor-db
+    #restart: unless-stopped
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=media-editor-db
+      - MONGODB_REPLICA_SET_MODE=primary
+      - MONGODB_ROOT_PASSWORD=dGcnRzGcNc8RXx6u
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+    volumes:
+      - /home/wbm/projects/media-editor/NAS/database:/bitnami
+    networks:
+      - mongodb
+
+  media-editor-db-secondary:
+    image: 'bitnami/mongodb:latest'
+    container_name: media-editor-db-secondary
+    #restart: unless-stopped
+    depends_on:
+      - media-editor-db
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=media-editor-db-secondary
+      - MONGODB_REPLICA_SET_MODE=secondary
+      - MONGODB_INITIAL_PRIMARY_HOST=media-editor-db
+      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=dGcnRzGcNc8RXx6u
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+    networks:
+      - mongodb
+
+  media-editor-db-arbiter:
+    image: 'bitnami/mongodb:latest'
+    container_name: media-editor-db-arbiter
+    #restart: unless-stopped
+    depends_on:
+      - media-editor-db
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=media-editor-db-arbiter
+      - MONGODB_REPLICA_SET_MODE=arbiter
+      - MONGODB_INITIAL_PRIMARY_HOST=media-editor-db
+      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=dGcnRzGcNc8RXx6u
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+    networks:
+      - mongodb
+  
+  media-editor-db-ui:
+    image: mongo-express
+    container_name: media-editor-db-ui
+    #restart: unless-stopped
+    environment:
+        - ME_CONFIG_MONGODB_URL=mongodb://root:dGcnRzGcNc8RXx6u@media-editor-db:27017/media-editor?replicaSet=replicaset&authSource=admin&retryWrites=true&w=majority&enableUtf8Validation=false
+        - ME_CONFIG_BASICAUTH_USERNAME=admin
+        - ME_CONFIG_BASICAUTH_PASSWORD=Admin@123
+    depends_on:
+        - media-editor-db
+        - media-editor-db-secondary
+        - media-editor-db-arbiter
+    ports:
+        - "9002:8081"
+    networks:
+        - mongodb
+
+  media-editor-redis:
+    image: redis
+    container_name: media-editor-redis
+    #restart: unless-stopped
+    volumes:
+      - redis:/data
+    networks:
+      - redis
+
+  app:
+    container_name: media-editor
+    image: ghcr.io/wbmentertainment/editor:latest
+    #restart: unless-stopped
+    volumes:
+      - ./downloads:/app/downloads
+      - ./updates:/app/updates
+      - /home/wbm/projects/media-editor/NAS/thumbnails:/app/thumbnails      
+      - ./data:/app/data
+      - /home/wbm/projects/media-editor/NAS/lyrics:/app/lyrics
+      - ./temps:/app/temps
+      - /home/wbm/projects/media-editor/NAS/storage:/app/storage
+      - /home/wbm/projects/media-editor/NAS/result_data:/app/result_data
+      - ./logs:/app/logs
+      - ./ffmpeg/bin:/app/ffmpeg/bin
+    ports:
+      - 8088:80
+    depends_on:
+      - media-editor-db
+      - media-editor-db-secondary
+      - media-editor-db-arbiter
+      - media-editor-redis
+    networks:
+      - nginx-net
+      - mongodb
+      - redis
+    
+volumes:
+  redis:
+    name: media-editor-redis
+    driver: local
+
+networks:
+  nginx-net:
+    name: nginx-net
+    external: true
+  mongodb:
+    name: media-editor-db
+  redis:
+    name: media-editor-redis

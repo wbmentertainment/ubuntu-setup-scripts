@@ -1,0 +1,105 @@
+services:
+  reup-db:
+    image: 'bitnami/mongodb:latest'
+    container_name: reup-db
+    #restart: unless-stopped
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=reup-db
+      - MONGODB_REPLICA_SET_MODE=primary
+      - MONGODB_ROOT_PASSWORD=dGcnRzGcNc8RXx6u
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+    volumes:
+      - /home/wbm/projects/media-reup/NAS/database:/bitnami  
+    networks:
+      - mongodb
+
+  reup-db-secondary:
+    image: 'bitnami/mongodb:latest'
+    container_name: reup-db-secondary
+    #restart: unless-stopped
+    depends_on:
+      - reup-db
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=reup-db-secondary
+      - MONGODB_REPLICA_SET_MODE=secondary
+      - MONGODB_INITIAL_PRIMARY_HOST=reup-db
+      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=dGcnRzGcNc8RXx6u
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+    networks:
+      - mongodb
+
+  reup-db-arbiter:
+    image: 'bitnami/mongodb:latest'
+    container_name: reup-db-arbiter
+    #restart: unless-stopped
+    depends_on:
+      - reup-db
+    environment:
+      - MONGODB_ADVERTISED_HOSTNAME=reup-db-arbiter
+      - MONGODB_REPLICA_SET_MODE=arbiter
+      - MONGODB_INITIAL_PRIMARY_HOST=reup-db
+      - MONGODB_INITIAL_PRIMARY_PORT_NUMBER=27017
+      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=dGcnRzGcNc8RXx6u
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+    networks:
+      - mongodb
+
+  reup-db-ui:
+    image: mongo-express
+    container_name: reup-db-ui
+    #restart: unless-stopped
+    environment:
+        - ME_CONFIG_MONGODB_URL=mongodb://root:dGcnRzGcNc8RXx6u@reup-db:27017/reup?replicaSet=replicaset&authSource=admin&retryWrites=true&w=majority
+        - ME_CONFIG_BASICAUTH_USERNAME=admin
+        - ME_CONFIG_BASICAUTH_PASSWORD=Admin@123
+    depends_on:
+        - reup-db
+        - reup-db-secondary
+        - reup-db-arbiter
+    ports:
+        - "9003:8081"
+    networks:
+        - mongodb
+
+  reup-redis:
+    image: redis
+    container_name: reup-redis
+    #restart: unless-stopped
+    volumes:
+      - redis:/data
+    networks:
+      - redis
+
+  app:
+    container_name: reup
+    image: ghcr.io/wbmentertainment/reup:latest
+    #restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+      - /home/wbm/projects/media-reup/NAS/files:/app/files
+    # ports:
+    #   - 8084:80
+    depends_on:
+      - reup-db
+      - reup-db-secondary
+      - reup-db-arbiter
+      - reup-redis
+    networks:
+      - nginx-net
+      - mongodb
+      - redis
+    
+volumes:
+  redis:
+    name: reup-redis
+    driver: local
+
+networks:
+  nginx-net:
+    name: nginx-net
+    external: true
+  mongodb:
+    name: reup-db
+  redis:
+    name: reup-redis
