@@ -26,6 +26,7 @@ sudo chmod +x "${PROJECT_DIR}/startup.sh"
 # Kiểm tra & pull image nếu chưa có
 if ! docker image inspect "$DOCKER_IMAGE" >/dev/null 2>&1; then
   echo "----> Docker image $DOCKER_IMAGE chưa có, tiến hành pull..."
+  echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_USER" --password-stdin
   docker pull "$DOCKER_IMAGE"
 else
   echo "ℹ️  Docker image $DOCKER_IMAGE đã tồn tại, bỏ qua pull."
