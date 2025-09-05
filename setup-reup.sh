@@ -6,6 +6,8 @@ OWNER="${SUDO_USER:-$USER}"
 REPO_DIR="${REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 PROJECT_DIR="/home/${OWNER}/projects/media-reup"
 SERVICE_FILE="/etc/systemd/system/media-reup.service"
+BK_SERVICE_FILE="/etc/systemd/system/media-reup-backup.service"
+TIMER_SERVICE_FILE="/etc/systemd/system/media-reup-backup.service"
 SRC_DIR="${REPO_DIR}/reup"
 
 # Image cần dùng (chỉnh theo docker-compose.yml của bạn)
@@ -63,3 +65,46 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now media-reup.service
 sudo systemctl restart media-reup.service
 sudo systemctl status media-reup.service --no-pager
+
+# ==== Tạo Backup service ====
+sudo tee "$BK_SERVICE_FILE" > /dev/null <<EOF
+[Unit]
+Description=Backup Mongo (reup) to NAS
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=wbm
+WorkingDirectory=/home/wbm/projects/media-reup
+ExecStart=/bin/bash /home/wbm/projects/media-reup/backup-mongo.sh
+EOF
+
+sudo chmod 644 "$BK_SERVICE_FILE"
+
+# ==== Nạp & chạy Backup service ====
+sudo systemctl daemon-reload
+sudo systemctl enable --now media-reup-backup.service
+sudo systemctl restart media-reup-backup.service
+sudo systemctl status media-reup-backup.service --no-pager
+
+# ==== Tạo Timer service ====
+sudo tee "$TIMER_SERVICE_FILE" > /dev/null <<EOF
+[Unit]
+Description=Run Backup Mongo (reup) daily at 02:00
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+Unit=media-reup-backup.service
+
+[Install]
+WantedBy=timers.target
+EOF
+
+sudo chmod 644 "$TIMER_SERVICE_FILE"
+
+# ==== Nạp & chạy Timer service ====
+sudo systemctl daemon-reload
+sudo systemctl enable --now media-reup-backup.timer
+systemctl list-timers | grep media-reup-backup

@@ -1,14 +1,14 @@
-# /home/wbm/projects/media-auth/backup-mongo.sh
+# /home/wbm/projects/media-reup/backup-mongo.sh
 #!/usr/bin/env bash
 set -euo pipefail
 
 # === config ===
 DATE="$(date +%F-%H%M%S)"
-LOCAL_BK_DIR="/home/wbm/projects/media-auth/backups"
-NAS_BK_DIR="/home/wbm/projects/media-auth/NAS/database"  # thư mục NAS đã mount
-CONTAINER="zodi-auth-db"         # primary container
+LOCAL_BK_DIR="/home/wbm/projects/media-reup/backups"
+NAS_BK_DIR="/home/wbm/projects/media-reup/NAS/database"  # thư mục NAS đã mount
+CONTAINER="reup-db"              # primary container
 RETENTION_DAYS=7                 # số ngày giữ bản local
-MONGO_URI="mongodb://root:dGcnRzGcNc8RXx6u@zodi-auth-db:27017/zodi-auth?replicaSet=replicaset&authSource=admin&retryWrites=true&w=majority&enableUtf8Validation=false"  # đổi pass nếu khác
+MONGO_URI="mongodb://root:dGcnRzGcNc8RXx6u@reup-db:27017/reup?replicaSet=replicaset&authSource=admin&retryWrites=true&w=majority&enableUtf8Validation=false"  # đổi pass nếu khác
 
 # === prepare ===
 mkdir -p "$LOCAL_BK_DIR"

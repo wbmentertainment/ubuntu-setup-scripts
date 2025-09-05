@@ -7,6 +7,7 @@ REPO_DIR="${REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 PROJECT_DIR="/home/${OWNER}/projects/media-auth"
 SERVICE_FILE="/etc/systemd/system/media-auth.service"
 BK_SERVICE_FILE="/etc/systemd/system/media-auth-backup.service"
+TIMER_SERVICE_FILE="/etc/systemd/system/media-auth-backup.service"
 SRC_DIR="${REPO_DIR}/auth"
 
 # Image cần dùng (chỉnh theo docker-compose.yml của bạn)
@@ -82,41 +83,29 @@ EOF
 
 sudo chmod 644 "$BK_SERVICE_FILE"
 
-# ==== Nạp & chạy service ====
+# ==== Nạp & chạy Backup service ====
 sudo systemctl daemon-reload
-sudo systemctl enable --now media-auth.service
-sudo systemctl restart media-auth.service
-sudo systemctl status media-auth.service --no-pager
+sudo systemctl enable --now media-auth-backup.service
+sudo systemctl restart media-auth-backup.service
+sudo systemctl status media-auth-backup.service --no-pager
 
-# ==== Tạo service ====
-sudo tee "$SERVICE_FILE" > /dev/null <<EOF
+# ==== Tạo Timer service ====
+sudo tee "$TIMER_SERVICE_FILE" > /dev/null <<EOF
 [Unit]
-Description=Chạy media-auth khi khởi động
-After=network-online.target docker.service
-Wants=network-online.target docker.service
+Description=Run Backup Mongo (auth) daily at 02:00
 
-[Service]
-Type=oneshot
-User=${OWNER}
-PermissionsStartOnly=true
-ExecStartPre=-/usr/bin/umount -l ${PROJECT_DIR}/NAS
-ExecStartPre=/usr/bin/mkdir -p ${PROJECT_DIR}/NAS
-ExecStartPre=/usr/bin/mount -t cifs -o username=admin1,password=Came2020,vers=3.0,rw,dir_mode=0777,file_mode=0777 //192.168.1.111/media-auth ${PROJECT_DIR}/NAS
-ExecStart=/bin/bash ${PROJECT_DIR}/startup.sh
-StandardOutput=append:/var/log/media-auth.log
-StandardError=append:/var/log/media-auth.log
-RemainAfterExit=true
-Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-WorkingDirectory=${PROJECT_DIR}
+[Timer]
+OnCalendar=*-*-* 02:00:00
+Persistent=true
+Unit=media-auth-backup.service
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=timers.target
 EOF
 
-sudo chmod 644 "$SERVICE_FILE"
+sudo chmod 644 "$TIMER_SERVICE_FILE"
 
-# ==== Nạp & chạy service ====
+# ==== Nạp & chạy Timer service ====
 sudo systemctl daemon-reload
-sudo systemctl enable --now media-auth.service
-sudo systemctl restart media-auth.service
-sudo systemctl status media-auth.service --no-pager
+sudo systemctl enable --now media-auth-backup.timer
+systemctl list-timers | grep media-auth-backup
