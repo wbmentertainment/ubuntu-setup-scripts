@@ -61,5 +61,5 @@ sudo chmod 644 "$SERVICE_FILE"
 # ==== Nạp & chạy service ====
 sudo systemctl daemon-reload
 sudo systemctl enable --now media-reup.service
-sudo systemctl start media-reup.service
+sudo systemctl restart media-reup.service
 sudo systemctl status media-reup.service --no-pager

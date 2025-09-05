@@ -61,5 +61,5 @@ sudo chmod 644 "$SERVICE_FILE"
 # ==== Nạp & chạy service ====
 sudo systemctl daemon-reload
 sudo systemctl enable --now media-editor.service
-sudo systemctl start media-editor.service
+sudo systemctl restart media-editor.service
 sudo systemctl status media-editor.service --no-pager
