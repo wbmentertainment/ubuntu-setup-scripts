@@ -26,20 +26,14 @@ ensure_docker_network() {
 run_module() {
   local name="$1"
   local src="${REPO_DIR}/setup-${name}.sh"
-  local dir="${BASE_DIR}/media-${name}"
   local dst="${dir}/setup-${name}.sh"
 
   echo "----> Chuẩn bị module: $name"
-  sudo mkdir -p "$dir"
-  sudo chown -R "${OWNER}:${OWNER}" "$dir"
 
   if [[ ! -f "$src" ]]; then
     echo "❌ Không tìm thấy $src trong repo"
     exit 1
   fi
-
-  cp "$src" "$dst"
-  chmod +x "$dst"
 
   echo "----> Chạy $dst"
   sudo bash "$dst"
