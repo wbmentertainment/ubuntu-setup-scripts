@@ -7,7 +7,7 @@ REPO_DIR="${REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 PROJECT_DIR="/home/${OWNER}/projects/media-reup"
 SERVICE_FILE="/etc/systemd/system/media-reup.service"
 BK_SERVICE_FILE="/etc/systemd/system/media-reup-backup.service"
-TIMER_SERVICE_FILE="/etc/systemd/system/media-reup-backup.service"
+TIMER_SERVICE_FILE="/etc/systemd/system/media-reup-backup.timer"
 SRC_DIR="${REPO_DIR}/reup"
 
 # Image cần dùng (chỉnh theo docker-compose.yml của bạn)
@@ -109,6 +109,5 @@ sudo chmod 644 "$TIMER_SERVICE_FILE"
 sudo systemctl daemon-reload
 sudo systemctl enable --now media-reup-backup.timer
 sudo systemctl restart media-reup-backup.timer
-sudo systemctl status media-reup-backup.timer --no-pager
 sudo systemctl status media-reup-backup.service --no-pager
-#systemctl list-timers | grep media-reup-backup
+systemctl list-timers | grep media-reup-backup

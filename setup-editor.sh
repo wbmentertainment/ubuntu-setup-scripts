@@ -7,7 +7,7 @@ REPO_DIR="${REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 PROJECT_DIR="/home/${OWNER}/projects/media-editor"
 SERVICE_FILE="/etc/systemd/system/media-editor.service"
 BK_SERVICE_FILE="/etc/systemd/system/media-editor-backup.service"
-TIMER_SERVICE_FILE="/etc/systemd/system/media-editor-backup.service"
+TIMER_SERVICE_FILE="/etc/systemd/system/media-editor-backup.timer"
 SRC_DIR="${REPO_DIR}/editor"
 
 # Image cần dùng (chỉnh theo docker-compose.yml của bạn)
@@ -109,6 +109,5 @@ sudo chmod 644 "$TIMER_SERVICE_FILE"
 sudo systemctl daemon-reload
 sudo systemctl enable --now media-editor-backup.timer
 sudo systemctl restart media-editor-backup.timer
-sudo systemctl status media-editor-backup.timer --no-pager
 sudo systemctl status media-editor-backup.service --no-pager
-#systemctl list-timers | grep media-editor-backup
+systemctl list-timers | grep media-editor-backup

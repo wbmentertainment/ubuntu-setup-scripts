@@ -7,7 +7,7 @@ REPO_DIR="${REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 PROJECT_DIR="/home/${OWNER}/projects/media-auth"
 SERVICE_FILE="/etc/systemd/system/media-auth.service"
 BK_SERVICE_FILE="/etc/systemd/system/media-auth-backup.service"
-TIMER_SERVICE_FILE="/etc/systemd/system/media-auth-backup.service"
+TIMER_SERVICE_FILE="/etc/systemd/system/media-auth-backup.timer"
 SRC_DIR="${REPO_DIR}/auth"
 
 # Image cần dùng (chỉnh theo docker-compose.yml của bạn)
@@ -110,6 +110,5 @@ sudo chmod 644 "$TIMER_SERVICE_FILE"
 sudo systemctl daemon-reload
 sudo systemctl enable --now media-auth-backup.timer
 sudo systemctl restart media-auth-backup.timer
-sudo systemctl status media-auth-backup.timer --no-pager
 sudo systemctl status media-auth-backup.service --no-pager
-#systemctl list-timers | grep media-auth-backup  --no-pager
+systemctl list-timers | grep media-auth-backup
