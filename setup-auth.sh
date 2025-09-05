@@ -87,8 +87,8 @@ sudo chmod 644 "$BK_SERVICE_FILE"
 # ==== Nạp & chạy Backup service ====
 sudo systemctl daemon-reload
 sudo systemctl enable --now media-auth-backup.service
-sudo systemctl restart media-auth-backup.service
-sudo systemctl status media-auth-backup.service --no-pager
+#sudo systemctl restart media-auth-backup.service
+#sudo systemctl status media-auth-backup.service --no-pager
 
 # ==== Tạo Timer service ====
 sudo tee "$TIMER_SERVICE_FILE" > /dev/null <<EOF
@@ -111,4 +111,5 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now media-auth-backup.timer
 sudo systemctl restart media-auth-backup.timer
 sudo systemctl status media-auth-backup.timer --no-pager
+sudo systemctl status media-auth-backup.service --no-pager
 #systemctl list-timers | grep media-auth-backup  --no-pager
