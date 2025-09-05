@@ -9,7 +9,7 @@ services:
       - MONGODB_ROOT_PASSWORD=dGcnRzGcNc8RXx6u
       - MONGODB_REPLICA_SET_KEY=replicasetkey123
     volumes:
-      - /home/wbm/projects/media-reup/NAS/database:/bitnami/mongodb
+      - data:/bitnami
     networks:
       - mongodb
 
@@ -91,6 +91,9 @@ services:
       - redis
     
 volumes:
+  data:
+    name: media-reup-data
+    driver: local
   redis:
     name: reup-redis
     driver: local
