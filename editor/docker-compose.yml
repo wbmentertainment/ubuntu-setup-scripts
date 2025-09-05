@@ -9,7 +9,7 @@ services:
       - MONGODB_ROOT_PASSWORD=dGcnRzGcNc8RXx6u
       - MONGODB_REPLICA_SET_KEY=replicasetkey123
     volumes:
-      - data:/bitnami
+      - editor-data:/bitnami
     networks:
       - mongodb
 
@@ -99,7 +99,7 @@ services:
       - redis
     
 volumes:
-  data:
+  editor-data:
     name: media-editor-data
     driver: local
   redis:

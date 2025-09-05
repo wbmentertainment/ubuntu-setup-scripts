@@ -5,7 +5,7 @@ set -euo pipefail
 # ==== CONFIG ====
 MONGO_CONTAINER="${MONGO_CONTAINER:-zodi-auth-db}"   # tên container primary
 MONGO_URI="${MONGO_URI:-mongodb://root:dGcnRzGcNc8RXx6u@zodi-auth-db:27017/zodi-auth?replicaSet=replicaset&authSource=admin&retryWrites=true&w=majority&enableUtf8Validation=false}"
-NAS_DIR="${NAS_DIR:-/home/wbm/projects/media-auth/NAS/backup}"  # thư mục NAS đã mount sẵn
+NAS_DIR="${NAS_DIR:-/home/wbm/projects/media-auth/NAS/database}"  # thư mục NAS đã mount sẵn
 RETENTION_DAYS="${RETENTION_DAYS:-3}"  # số ngày giữ bản backup
 # ==== END CONFIG ====
 
