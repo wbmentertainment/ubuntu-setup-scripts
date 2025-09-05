@@ -6,21 +6,10 @@ OWNER="${SUDO_USER:-$USER}"
 PROJECT_DIR="/home/${OWNER}/projects/media-editor"
 SERVICE_FILE="/etc/systemd/system/media-editor.service"
 
-# Link RAW đến repo (đặt đúng username/repo/branch)
-BASE_RAW="https://cdn.jsdelivr.net/gh/wbmentertainment/ubuntu-setup-scripts@main/editor"
-URL_STARTUP="${BASE_RAW}/startup.sh"
-URL_COMPOSE="${BASE_RAW}/docker-compose.yml"
-
 # ==== Chuẩn bị thư mục ====
 sudo mkdir -p "$PROJECT_DIR"
 sudo chown -R "${OWNER}:${OWNER}" "$PROJECT_DIR"
 
-# ==== Tải file cần thiết ====
-echo "-> Download startup.sh: ${URL_STARTUP}"
-curl -fsSL "${URL_STARTUP}" -o "${PROJECT_DIR}/startup.sh"
-
-echo "-> Download docker-compose.yml: ${URL_COMPOSE}"
-curl -fsSL "${URL_COMPOSE}" -o "${PROJECT_DIR}/docker-compose.yml"
 
 # Quyền thực thi cho startup.sh
 sudo chown "${OWNER}:${OWNER}" "${PROJECT_DIR}/startup.sh" "${PROJECT_DIR}/docker-compose.yml"
