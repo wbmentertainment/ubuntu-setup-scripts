@@ -2,31 +2,41 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# === config ===
+# ==== CONFIG ====
+MONGO_CONTAINER="${MONGO_CONTAINER:-media-editor-db}"   # tên container primary
+MONGO_URI="${MONGO_URI:-mongodb://root:dGcnRzGcNc8RXx6u@media-editor-db:27017/media-editor?replicaSet=replicaset&authSource=admin&retryWrites=true&w=majority&enableUtf8Validation=false}"
+NAS_DIR="${NAS_DIR:-/home/wbm/projects/media-auth/NAS/backup}"  # thư mục NAS đã mount sẵn
+RETENTION_DAYS="${RETENTION_DAYS:-3}"  # số ngày giữ bản backup
+# ==== END CONFIG ====
+
 DATE="$(date +%F-%H%M%S)"
-# LOCAL_BK_DIR="/home/wbm/projects/media-editor/backups"
-NAS_BK_DIR="/home/wbm/projects/media-editor/NAS/database"  # thư mục NAS đã mount
-CONTAINER="media-editor-db"      # primary container
-RETENTION_DAYS=3                 # số ngày giữ bản backup
-MONGO_URI="mongodb://root:dGcnRzGcNc8RXx6u@media-editor-db:27017/media-editor?replicaSet=replicaset&authSource=admin&retryWrites=true&w=majority&enableUtf8Validation=false"  # đổi pass nếu khác
+FINAL="${NAS_DIR}/mongo-${DATE}.archive.gz"
+PART="${FINAL}.part"
 
-# === prepare ===
-# mkdir -p "$LOCAL_BK_DIR"
-mkdir -p "$NAS_BK_DIR" || true    # NAS có thể là automount, thư mục sẽ xuất hiện khi truy cập
+echo "==> Backup to NAS: ${FINAL}"
 
-ARCHIVE_FILE="${NAS_BK_DIR}/mongo-${DATE}.archive.gz"
+# 1) Đảm bảo NAS ghi được
+mkdir -p "${NAS_DIR}"
+touch "${NAS_DIR}/.write_test" 2>/dev/null || {
+  echo "❌ NAS_DIR không ghi được: ${NAS_DIR}"; exit 1;
+}
+rm -f "${NAS_DIR}/.write_test"
 
-# === dump (dùng mongodump trong container) ===
-echo "==> Dumping MongoDB to ${ARCHIVE_FILE}"
-docker exec "${CONTAINER}" bash -lc \
-  "mongodump --uri='${MONGO_URI}' --archive | gzip -c" > "${ARCHIVE_FILE}"
+# 2) Tạo file tạm (.part) rồi move sang tên cuối khi hoàn tất
+#    Ưu tiên dùng mongodump trong container; nếu không có thì dùng image mongo:7 để dump
+if docker exec "${MONGO_CONTAINER}" bash -lc 'command -v mongodump >/dev/null'; then
+  echo "==> Using mongodump inside ${MONGO_CONTAINER}"
+  docker exec "${MONGO_CONTAINER}" bash -lc \
+    "mongodump --uri='${MONGO_URI}' --archive | gzip -c" > "${PART}"
+else
+  echo "==> mongodump not found in container; using helper image mongo:7"
+  docker run --rm --network "container:${MONGO_CONTAINER}" mongo:7 \
+    bash -lc "mongodump --uri='${MONGO_URI}' --archive | gzip -c" > "${PART}"
+fi
 
-# === sync to NAS ===
-# echo "==> Sync to NAS: ${NAS_BK_DIR}"
-# rsync -a --partial --inplace "${ARCHIVE_FILE}" "${NAS_BK_DIR}/"
+# 3) Đổi tên atomically
+mv -f "${PART}" "${FINAL}"
+echo "✅ Wrote ${FINAL}"
 
-# === prune old backups ===
-echo "==> Prune backups > ${RETENTION_DAYS} days"
-find "${NAS_BK_DIR}" -type f -name 'mongo-*.archive.gz' -mtime +${RETENTION_DAYS} -delete
-
-echo "✅ Done: ${ARCHIVE_FILE}"
+# 4) Dọn bản cũ trên NAS
+find "${NAS_DIR}" -type f -name 'mongo-*.archive.gz' -mtime +"${RETENTION_DAYS}" -delete || true
