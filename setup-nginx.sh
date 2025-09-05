@@ -42,6 +42,8 @@ Wants=network-online.target docker.service
 Type=oneshot
 User=${OWNER}
 ExecStart=/bin/bash ${PROJECT_DIR}/startup.sh
+StandardOutput=append:/var/log/media-nginx.log
+StandardError=append:/var/log/media-nginx.log
 RemainAfterExit=true
 Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 WorkingDirectory=${PROJECT_DIR}
