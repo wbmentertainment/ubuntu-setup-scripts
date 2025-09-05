@@ -35,7 +35,7 @@ run_module() {
   fi
 
   echo "----> Chạy $src"
-  sudo bash "$src"
+  sudo --preserve-env=GITHUB_USER,GITHUB_TOKEN bash "$src"
 }
 
 # === Main ===
