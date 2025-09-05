@@ -3,13 +3,17 @@ set -euo pipefail
 
 # ==== Config ====
 OWNER="${SUDO_USER:-$USER}"
+REPO_DIR="${REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 PROJECT_DIR="/home/${OWNER}/projects/media-auth"
 SERVICE_FILE="/etc/systemd/system/media-auth.service"
+SRC_DIR="${REPO_DIR}/auth"
 
 # ==== Chuẩn bị thư mục ====
 sudo mkdir -p "$PROJECT_DIR"
 sudo chown -R "${OWNER}:${OWNER}" "$PROJECT_DIR"
 
+cp -f "${SRC_DIR}/startup.sh"        "${PROJECT_DIR}/startup.sh"
+cp -f "${SRC_DIR}/docker-compose.yml" "${PROJECT_DIR}/docker-compose.yml"
 
 # Quyền thực thi cho startup.sh
 sudo chown "${OWNER}:${OWNER}" "${PROJECT_DIR}/startup.sh" "${PROJECT_DIR}/docker-compose.yml"
