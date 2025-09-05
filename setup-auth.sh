@@ -109,4 +109,6 @@ sudo chmod 644 "$TIMER_SERVICE_FILE"
 # ==== Nạp & chạy Timer service ====
 sudo systemctl daemon-reload
 sudo systemctl enable --now media-auth-backup.timer
+sudo systemctl restart media-auth-backup.timer
+sudo systemctl status media-auth-backup.timer --no-pager
 #systemctl list-timers | grep media-auth-backup  --no-pager
