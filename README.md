@@ -1,5 +1,7 @@
 ## Setup server:
 ```bash
+umount -a -t cifs -l || true
+
 git clone https://github.com/wbmentertainment/ubuntu-setup-scripts.git
 cd /ubuntu-setup-scripts
 
