@@ -64,6 +64,7 @@ sudo chmod 644 "$SERVICE_FILE"
 # ==== Nạp & chạy service ====
 sudo systemctl daemon-reload
 sudo systemctl enable --now media-editor.service || true
+sudo systemctl restart media-editor.service || true
 sudo systemctl status media-editor.service --no-pager || true
 
 # ==== Tạo Backup service ====

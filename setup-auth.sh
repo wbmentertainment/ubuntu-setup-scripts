@@ -65,6 +65,7 @@ sudo chmod 644 "$SERVICE_FILE"
 # ==== Nạp & chạy service ====
 sudo systemctl daemon-reload
 sudo systemctl enable --now media-auth.service || true
+sudo systemctl restart media-auth.service || true
 sudo systemctl status media-auth.service --no-pager || true
 
 # ==== Tạo Backup service ====

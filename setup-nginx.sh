@@ -60,6 +60,6 @@ sudo chmod 644 "$SERVICE_FILE"
 
 # ==== Nạp & chạy service ====
 sudo systemctl daemon-reload
-sudo systemctl enable --now media-nginx.service
-sudo systemctl restart media-nginx.service
-sudo systemctl status media-nginx.service --no-pager
+sudo systemctl enable --now media-nginx.service || true
+sudo systemctl restart media-nginx.service || true
+sudo systemctl status media-nginx.service --no-pager || true
